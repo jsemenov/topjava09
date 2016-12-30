@@ -16,10 +16,6 @@ import java.util.stream.Collectors;
  * @param <T> : Entity
  */
 public class ModelMatcher<T> {
-    public interface Comparator<T> {
-        boolean compare(T expected, T actual);
-    }
-
     private static final Comparator DEFAULT_COMPARATOR =
             (Object expected, Object actual) -> expected == actual || String.valueOf(expected).equals(String.valueOf(actual));
 
@@ -31,6 +27,26 @@ public class ModelMatcher<T> {
 
     public ModelMatcher(Comparator<T> comparator) {
         this.comparator = comparator;
+    }
+
+    public void assertEquals(T expected, T actual) {
+        Assert.assertEquals(wrap(expected), wrap(actual));
+    }
+
+    public void assertCollectionEquals(Collection<T> expected, Collection<T> actual) {
+        Assert.assertEquals(wrap(expected), wrap(actual));
+    }
+
+    public Wrapper wrap(T entity) {
+        return new Wrapper(entity);
+    }
+
+    public List<Wrapper> wrap(Collection<T> collection) {
+        return collection.stream().map(this::wrap).collect(Collectors.toList());
+    }
+
+    public interface Comparator<T> {
+        boolean compare(T expected, T actual);
     }
 
     private class Wrapper {
@@ -52,21 +68,5 @@ public class ModelMatcher<T> {
         public String toString() {
             return String.valueOf(entity);
         }
-    }
-
-    public void assertEquals(T expected, T actual) {
-        Assert.assertEquals(wrap(expected), wrap(actual));
-    }
-
-    public void assertCollectionEquals(Collection<T> expected, Collection<T> actual) {
-        Assert.assertEquals(wrap(expected), wrap(actual));
-    }
-
-    public Wrapper wrap(T entity) {
-        return new Wrapper(entity);
-    }
-
-    public List<Wrapper> wrap(Collection<T> collection) {
-        return collection.stream().map(this::wrap).collect(Collectors.toList());
     }
 }
